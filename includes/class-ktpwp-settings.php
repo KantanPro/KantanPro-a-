@@ -5334,7 +5334,7 @@ div.ktp_header > * {
                                     <?php echo esc_html__( 'デバッグログを有効にする', 'kantanpro' ); ?>
                                 </label>
                                 <p class="description">
-                                    <?php echo esc_html__( 'デバッグログは安全な場所（wp-content/logs/）に保存されます。', 'kantanpro' ); ?>
+                                    <?php echo esc_html__( 'デバッグログの保存先は wp-config.php の WP_DEBUG_LOG で指定します。', 'kantanpro' ); ?>
                                 </p>
                             </fieldset>
                         </td>
@@ -5501,7 +5501,7 @@ div.ktp_header > * {
 define( 'WP_DEBUG', true );
 
 <?php echo esc_html__( 'デバッグログを安全な場所に保存', 'kantanpro' ); ?>
-define( 'WP_DEBUG_LOG', WP_CONTENT_DIR . '/logs/debug.log' );
+define( 'WP_DEBUG_LOG', true );
 
 <?php echo esc_html__( 'デバッグ表示を無効化（本番環境では必須）', 'kantanpro' ); ?>
 define( 'WP_DEBUG_DISPLAY', false );
@@ -5629,17 +5629,12 @@ define( 'WP_DEBUG_DISPLAY', false );
                 $log_message .= ' | Context: ' . wp_json_encode( $context );
             }
 
-            // 安全なログファイルパスを使用
-            $log_file = defined( 'WP_DEBUG_LOG' ) ? WP_DEBUG_LOG : WP_CONTENT_DIR . '/logs/debug.log';
-
-            // ログディレクトリが存在しない場合は作成
-            $log_dir = dirname( $log_file );
-            if ( ! is_dir( $log_dir ) ) {
-                wp_mkdir_p( $log_dir );
+            // ログの保存先は wp-config.php の WP_DEBUG_LOG が決めるもので、
+            // プラグインからディレクトリを作ったり場所を決めたりはしない。
+            // パスが指定されている場合だけローテーションを見る。
+            if ( defined( 'WP_DEBUG_LOG' ) && is_string( WP_DEBUG_LOG ) && WP_DEBUG_LOG !== '' ) {
+                self::check_log_rotation( WP_DEBUG_LOG );
             }
-
-            // ログローテーションをチェック
-            self::check_log_rotation( $log_file );
 
             // ログファイルに書き込み
             error_log( $log_message );

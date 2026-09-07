@@ -3,7 +3,7 @@
  * Plugin Name: KantanPro
  * Plugin URI: https://www.kantanpro.com/
  * Description: スモールビジネスのための販売支援ツール。ショートコード[ktpwp_all_tab]を固定ページに設置してください。
- * Version: 1.3.38
+ * Version: 1.3.39
  * Author: KantanPro
  * Author URI: https://www.kantanpro.com/kantanpro-page
  * License: GPL v2 or later
@@ -3625,51 +3625,6 @@ if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
     error_log( 'KTPWP Plugin: Loading started' );
 }
 
-// 安全なログディレクトリの自動作成
-function ktpwp_setup_safe_logging() {
-    // wp-config.phpでWP_DEBUG_LOGが設定されている場合のみ実行
-    if ( defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
-        $log_dir = WP_CONTENT_DIR . '/logs';
-
-        // ログディレクトリが存在しない場合は作成
-        if ( ! is_dir( $log_dir ) ) {
-            wp_mkdir_p( $log_dir );
-
-            // .htaccessファイルを作成してログディレクトリへのアクセスを制限
-            $htaccess_content = "Order deny,allow\nDeny from all";
-            file_put_contents( $log_dir . '/.htaccess', $htaccess_content );
-
-            // index.phpファイルを作成してディレクトリリスティングを防止
-            file_put_contents( $log_dir . '/index.php', '<?php // Silence is golden' );
-
-            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                error_log( 'KTPWP: Created secure log directory at ' . $log_dir );
-            }
-        }
-
-        // 既存のログディレクトリの保護を確認
-        if ( is_dir( $log_dir ) ) {
-            $htaccess_file = $log_dir . '/.htaccess';
-            $index_file = $log_dir . '/index.php';
-
-            // .htaccessファイルが存在しない場合は作成
-            if ( ! file_exists( $htaccess_file ) ) {
-                $htaccess_content = "Order deny,allow\nDeny from all";
-                file_put_contents( $htaccess_file, $htaccess_content );
-            }
-
-            // index.phpファイルが存在しない場合は作成
-            if ( ! file_exists( $index_file ) ) {
-                file_put_contents( $index_file, '<?php // Silence is golden' );
-            }
-        }
-    }
-}
-
-// プラグイン読み込み時にログディレクトリを設定（デバッグ時のみ）
-if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-    add_action( 'plugins_loaded', 'ktpwp_setup_safe_logging', 1 );
-}
 
 // プラグイン初期化時のREST API制限を一時的に無効化
 function ktpwp_disable_rest_api_restriction_during_init() {

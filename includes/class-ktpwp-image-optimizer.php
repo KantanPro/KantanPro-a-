@@ -94,9 +94,6 @@ class KTPWP_Image_Optimizer {
             add_action( 'wp_ajax_ktpwp_convert_to_webp', array( $this, 'ajax_convert_to_webp' ) );
         }
         
-        // .htaccessファイルにWebP配信ルールを追加
-        add_action( 'init', array( $this, 'maybe_update_htaccess' ) );
-        
         // デバッグ時の統計表示
         if ( defined( 'WP_DEBUG' ) && WP_DEBUG && is_admin() ) {
             add_action( 'admin_footer', array( $this, 'display_optimization_stats' ) );
@@ -565,68 +562,6 @@ class KTPWP_Image_Optimizer {
         return file_exists( $webp_path );
     }
 
-    /**
-     * .htaccessファイルを更新（WebP配信ルール追加）
-     */
-    public function maybe_update_htaccess() {
-        if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) {
-            return;
-        }
-        
-        // 既に処理済みかチェック
-        if ( get_option( 'ktpwp_htaccess_webp_updated' ) ) {
-            return;
-        }
-        
-        $htaccess_file = ABSPATH . '.htaccess';
-        
-        if ( ! is_writable( $htaccess_file ) ) {
-            return;
-        }
-        
-        $webp_rules = $this->get_webp_htaccess_rules();
-        $current_content = file_get_contents( $htaccess_file );
-        
-        if ( strpos( $current_content, '# KantanPro WebP Rules' ) === false ) {
-            $new_content = $webp_rules . "\n" . $current_content;
-            
-            if ( file_put_contents( $htaccess_file, $new_content ) ) {
-                update_option( 'ktpwp_htaccess_webp_updated', true );
-                
-                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                    error_log( 'KTPWP Image Optimizer: .htaccess updated with WebP rules' );
-                }
-            }
-        }
-    }
-
-    /**
-     * WebP配信用の.htaccessルールを取得
-     * 
-     * @return string
-     */
-    private function get_webp_htaccess_rules() {
-        return '# KantanPro WebP Rules
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    
-    # WebP対応ブラウザに対してWebPを配信
-    RewriteCond %{HTTP_ACCEPT} image/webp
-    RewriteCond %{REQUEST_FILENAME} \.(jpe?g|png)$
-    RewriteCond %{REQUEST_FILENAME}.webp -f
-    RewriteRule ^(.+)\.(jpe?g|png)$ $1.$2.webp [T=image/webp,E=accept:1]
-</IfModule>
-
-<IfModule mod_headers.c>
-    Header append Vary Accept env=REDIRECT_accept
-</IfModule>
-
-# WebPファイルの適切なMIMEタイプ設定
-<IfModule mod_mime.c>
-    AddType image/webp .webp
-</IfModule>
-# End KantanPro WebP Rules';
-    }
 
     /**
      * 最適化統計を取得

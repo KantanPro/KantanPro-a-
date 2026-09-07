@@ -4,7 +4,7 @@ Tags: invoice, crm, order management, quotation, business
 Requires at least: 5.9
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.38
+Stable tag: 1.3.39
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -147,6 +147,13 @@ fields. It only sends anything if you have entered your own OpenAI API key.
 == Changelog ==
 
 The complete history is in `changelog.txt`, bundled with the plugin.
+
+= 1.3.39 - 2026-09-07 =
+* Removed the automatic rewriting of the site's root .htaccess file. The plugin no
+  longer appends WebP delivery rules to a file it does not own.
+* Removed the creation of a wp-content/logs directory and the .htaccess/index.php
+  files placed in it. The debug log location is left entirely to the WP_DEBUG_LOG
+  constant in wp-config.php.
 
 = 1.3.38 - 2026-09-05 =
 * Fixed the plugin stylesheet shrinking profile pictures that belong to the theme.
